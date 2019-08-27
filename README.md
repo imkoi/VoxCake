@@ -67,10 +67,10 @@ public class ModelExample : Volume
 {
     private void Start()
     {
-		ResourceManager.Init();
+	ResourceManager.Init();
         MaterialManager.Init();
-        GetComponent<MeshFilter>().mesh = ResourceManager.GetModel("pathToYourModel", PlayerTeam.Green);
-		GetComponent<MeshRenderer>().material = MaterialManager.model;
+        GetComponent<MeshFilter>().mesh = ModelMesh.Get("pathToYourModel", PlayerTeam.Green);
+	GetComponent<MeshRenderer>().material = MaterialManager.model;
     }
 }
 ```
