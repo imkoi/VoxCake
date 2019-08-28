@@ -19,14 +19,16 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
     - [X] Collision for voxel volumes;
     - [X] Physic for voxel volumes;
 - [X] Rendering:
-    - [X] Chunk octa-frustum culling; (Glitched right now)
+    - [X] Chunk octree frustum culling; (Glitched right now)
     - [X] Chunk frustum culling;
     - [X] Chunk loading near camera;
 - [X] Saving and Loading of voxel volumes:
     - [X] .vcmap;
+    - [X] .vxl;
     - [X] .vcmod;
-	- [X] .kv6;
-	- [X] .vox;
+    - [X] .kv6;
+    - [X] .vox;
+	-
     
 ## Installing
 1. Copy VoxCake folder to your Unity project.
