@@ -28,7 +28,6 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
     - [X] .vcmod;
     - [X] .kv6;
     - [X] .vox;
-	-
     
 ## Installing
 1. Copy VoxCake folder to your Unity project.
