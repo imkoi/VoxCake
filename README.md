@@ -64,7 +64,7 @@ To load model in format .vox(for example) you should:
 using VoxCake;
 using UnityEngine;
 
-public class ModelExample : Volume
+public class ModelExample
 {
     private void Start()
     {
