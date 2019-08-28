@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Unity.Mathematics;
 
 namespace VoxCake.Common
 {
@@ -225,7 +224,7 @@ namespace VoxCake.Common
                 };
             }
 
-            return new Mesh();
+            return null;
         }
 
         private static void SetFace(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, int index, uint inputColor, float light,

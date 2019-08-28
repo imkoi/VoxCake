@@ -9,7 +9,6 @@ namespace VoxCake
     {
         public static byte size = 16;
         public byte x, y, z;
-        public bool isEmpty;
         public float sqrDistanceToCamera;
         public Mesh mesh;
         public Volume volume;
@@ -25,10 +24,26 @@ namespace VoxCake
 
         public static void UpdateStack()
         {
-            if (stack.Count != 0)
+            int count = stack.Count;
+            int cpu = Config.cpuCount;
+            if (count != 0)
             {
-                Chunk chunk = stack.Pop();
-                Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                if (count < cpu)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        Chunk chunk = stack.Pop();
+                        Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < cpu; i++)
+                    {
+                        Chunk chunk = stack.Pop();
+                        Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                    }
+                }
             }
         }
         public static void Add(Chunk chunk)
@@ -64,8 +79,6 @@ namespace VoxCake
             if (x >= 0 && x < volume.wdc && y >= 0 && y < volume.hdc && z >= 0 && z < volume.ddc)
             {
                 volume.chunks[x, y, z].mesh = ChunkMesh.Get(x, y, z, volume);
-                if (volume.chunks[x, y, z].mesh.triangles.Length == 0) volume.chunks[x, y, z].isEmpty = true;
-                else volume.chunks[x, y, z].isEmpty = false;
             }
         }
 

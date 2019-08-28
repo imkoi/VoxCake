@@ -15,21 +15,21 @@ namespace VoxCake
         [HideInInspector] public int hdc;
         [HideInInspector] public int ddc;
         [HideInInspector] public Chunk[,,] chunks;
+        public Octree octree;
 
         private void Awake()
         {
-            MaterialManager.Init();
-
-            wdc = Mathf.CeilToInt((float)width / Chunk.size);
-            hdc = Mathf.CeilToInt((float)height / Chunk.size);
-            ddc = Mathf.CeilToInt((float)depth / Chunk.size);
-
-            if (width < Chunk.size && height < Chunk.size && depth < Chunk.size)
+            if (width < Chunk.size || height < Chunk.size || depth < Chunk.size)
             {
                 Chunk.size = (byte)width;
                 Chunk.size = (byte)width;
                 Chunk.size = (byte)depth;
             }
+
+            wdc = Mathf.CeilToInt((float)width / Chunk.size);
+            hdc = Mathf.CeilToInt((float)height / Chunk.size);
+            ddc = Mathf.CeilToInt((float)depth / Chunk.size);
+
             data = new uint[width, height, depth];
             chunks = new Chunk[wdc, hdc, ddc];
             for (byte x = 0; x < wdc; x++)
@@ -42,6 +42,10 @@ namespace VoxCake
                     }
                 }
             }
+
+            int md = GetMaxDimension();
+            int size = md / 2;
+            octree = new Octree(new Vector3Int(size, size, size), md, GetDepth(md), this);
         }
         private void LateUpdate()
         {
@@ -95,26 +99,7 @@ namespace VoxCake
             this.data = data;
         }
         public void SetGrid()
-        {/*
-            Vector3[] vertices =
-            {
-                new Vector3(0, 0, 0),
-                new Vector3(0, 0, depth+0.1f),
-                new Vector3(width+0.1f, 0, depth+0.1f),
-                new Vector3(width+0.1f, 0, 0)
-            };
-            int[] triangles =
-            {
-                2, 0, 1, 0, 2, 3
-            };
-
-            gameObject.AddComponent<MeshFilter>().mesh = new Mesh
-            {
-                vertices = vertices,
-                triangles = triangles
-            };
-            gameObject.AddComponent<MeshRenderer>().material = MaterialManager.grid;
-            */
+        {
             float width = this.width + 0.08f;
             float height = this.height + 0.08f;
             float depth = this.depth + 0.08f;
@@ -417,6 +402,21 @@ namespace VoxCake
             if (b > 255) b = 255;
 
             return UColor.RGBAToUint((byte)r, (byte)g, (byte)b, 100);
+        }
+
+        private int GetMaxDimension()
+        {
+            if (width >= height && width >= depth)
+                return width;
+            if (height >= width && height >= depth)
+                return height;
+            if (depth >= width && depth >= height)
+                return depth;
+            return 0;
+        }
+        private int GetDepth(int maxDimension)
+        {
+            return maxDimension / Chunk.size / 8;
         }
     }
 }
