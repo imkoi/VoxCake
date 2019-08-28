@@ -67,10 +67,12 @@ public class ModelExample : Volume
 {
     private void Start()
     {
-		ResourceManager.Init();
+	ResourceManager.Init();
         MaterialManager.Init();
-        GetComponent<MeshFilter>().mesh = ResourceManager.GetModel("pathToYourModel", PlayerTeam.Green);
-		GetComponent<MeshRenderer>().material = MaterialManager.model;
+        GetComponent<MeshFilter>().mesh = ModelMesh.Get("pathToYourModel", PlayerTeam.Green);
+	GetComponent<MeshRenderer>().material = MaterialManager.model;
     }
 }
 ```
+### Showcase
+[![Watch the video](https://steamuserimages-a.akamaihd.net/ugc/976613425704858920/E913B74E84C2C07921E35FD83EBB375A1CA17F51/?imw=1024&imh=576&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true)](https://www.youtube.com/watch?v=nwWKZDr22ts)
