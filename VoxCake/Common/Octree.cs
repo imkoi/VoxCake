@@ -18,13 +18,23 @@ namespace VoxCake.Common
 
     public class Octree
     {
-        private Volume volume;
         public OctreeNode node;
         private int depth;
 
-        public Octree(Vector3Int position, int size, int depth, Volume volume)
+        public Octree(int x, int y, int z)
         {
-            node = new OctreeNode(position, size);
+            int maxDim = 0;
+            if (x >= y && x >= z)
+                maxDim = x;
+            else if (y >= x && y >= z)
+                maxDim = y;
+            else if (z >= x && z >= y)
+                maxDim = z;
+            int mdHalf = maxDim / 2;
+            int depth = maxDim / Chunk.size / 8;
+            
+            Vector3Int position = new Vector3Int(mdHalf, mdHalf, mdHalf);
+            node = new OctreeNode(position, maxDim);
             node.Subdivide(depth);
         }
         private int GetIndexOfPosition(Vector3Int lookupPosition, Vector3 nodePosition)

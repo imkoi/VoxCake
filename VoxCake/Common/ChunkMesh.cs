@@ -4,7 +4,7 @@ namespace VoxCake.Common
 {
     public class ChunkMesh
     {
-        public static bool modelEditor = false;
+        public static bool modelEditor = true;
         public static float[] ambientOcclusion = new[] { 6f, 5f, 3f };
         public static float[] edgeLighting = new[] { 12f, 10f, 8f };
 
@@ -214,7 +214,6 @@ namespace VoxCake.Common
                         }
                     }
                 }
-
                 return new Mesh
                 {
                     vertices = vertices,
@@ -223,7 +222,6 @@ namespace VoxCake.Common
                     uv = uv
                 };
             }
-
             return null;
         }
 

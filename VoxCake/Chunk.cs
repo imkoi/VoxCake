@@ -2,6 +2,8 @@
 using UnityEngine;
 using VoxCake.Common;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VoxCake
 {
@@ -9,6 +11,9 @@ namespace VoxCake
     {
         public static byte size = 16;
         public byte x, y, z;
+        public Vector3 position;
+        public Vector3 min;
+        public Vector3 max; 
         public float sqrDistanceToCamera;
         public Mesh mesh;
         public Volume volume;
@@ -16,9 +21,16 @@ namespace VoxCake
 
         public Chunk(byte x, byte y, byte z, Volume volume)
         {
+            int cs = Chunk.size;
+            float csph = cs + 0.5f;
+
             this.x = x;
             this.y = y;
             this.z = z;
+            position = new Vector3(x*cs, y*cs, z*cs);
+            min = new Vector3((float)(x*csph), (float)(y*csph),(float)(z*csph));
+            max = new Vector3((float)(x*csph+cs), (float)(y*csph+cs),(float)(z*csph+cs));
+            
             this.volume = volume;
         }
 
@@ -45,6 +57,18 @@ namespace VoxCake
                     }
                 }
             }
+        }
+
+        public static void ExecuteChunk()
+        {
+            Action action = () =>
+            {
+                Chunk chunk = stack.Pop();
+                Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+            };
+            Task task = new Task(action);
+            task.Start();
+            task.Wait();
         }
         public static void Add(Chunk chunk)
         {

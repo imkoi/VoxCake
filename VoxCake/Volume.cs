@@ -22,7 +22,7 @@ namespace VoxCake
             if (width < Chunk.size || height < Chunk.size || depth < Chunk.size)
             {
                 Chunk.size = (byte)width;
-                Chunk.size = (byte)width;
+                Chunk.size = (byte)height;
                 Chunk.size = (byte)depth;
             }
 
@@ -33,28 +33,20 @@ namespace VoxCake
             data = new uint[width, height, depth];
             chunks = new Chunk[wdc, hdc, ddc];
             for (byte x = 0; x < wdc; x++)
-            {
                 for (byte y = 0; y < hdc; y++)
-                {
                     for (byte z = 0; z < ddc; z++)
-                    {
                         chunks[x, y, z] = new Chunk(x, y, z, this);
-                    }
-                }
-            }
-
-            int md = GetMaxDimension();
-            int size = md / 2;
-            octree = new Octree(new Vector3Int(size, size, size), md, GetDepth(md), this);
+            
+            octree = new Octree(width,height,depth);
         }
         private void LateUpdate()
         {
             Chunk.UpdateStack();
         }
 
-        public void Render()
+        public void Render(Camera camera)
         {
-            Renderer.RenderVolume(this);
+            Renderer.UseFrustumCulling(camera, this);
         }
         public void Collide(Vector3 position)
         {
@@ -402,21 +394,6 @@ namespace VoxCake
             if (b > 255) b = 255;
 
             return UColor.RGBAToUint((byte)r, (byte)g, (byte)b, 100);
-        }
-
-        private int GetMaxDimension()
-        {
-            if (width >= height && width >= depth)
-                return width;
-            if (height >= width && height >= depth)
-                return height;
-            if (depth >= width && depth >= height)
-                return depth;
-            return 0;
-        }
-        private int GetDepth(int maxDimension)
-        {
-            return maxDimension / Chunk.size / 8;
         }
     }
 }
