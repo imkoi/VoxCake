@@ -73,7 +73,8 @@ public class ModelExample
     private void Start()
     {
         MaterialManager.Init();
-        GetComponent<MeshFilter>().mesh = ModelMesh.Get("pathToYourModel", PlayerTeam.Green);
+	string path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
+        GetComponent<MeshFilter>().mesh = ModelMesh.Get(path, PlayerTeam.Green);
 	GetComponent<MeshRenderer>().material = MaterialManager.model;
     }
 }
