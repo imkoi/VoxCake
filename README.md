@@ -31,14 +31,15 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
     
 ## Installing
 1. Copy VoxCake folder to your Unity project.
-2. You don`t need the second step, youre ready to create great things!
+2. You don`t need the second step, you`re ready to create great things!
 3. You also don`t need the third step :D
 
 ## First steps
 Well, i think that at first, you would see the fast results, dont you?
 Okay, let`s create your first voxel volume in few lines of code! To make that you should:
-1. Put map into StreammingAssets folder
-2. Make GameObject and attach this script
+1. Download some map. (You could find it here: http://aos.party/)
+2. Put map into StreammingAssets folder
+3. Make GameObject and attach this script:
 ```csharp
 using VoxCake;
 using UnityEngine;
@@ -47,7 +48,9 @@ public class MapExample : Volume
 {
     private void Start()
     {
-        LoadNearCamera("pathToYourMap", UColor.RGBAToUint(86, 93, 110, 100), Camera.main);
+    	string path = Application.streamingAssetsPath + "/mapname.vxl"; // CHANGE "mapname" to name of your map file!
+	uint innerColor = UColor.RGBAToUint(86, 93, 110, 100);
+        LoadNearCamera(path, innerColor, Camera.main);
     }
     private void Update()
     {
@@ -55,10 +58,11 @@ public class MapExample : Volume
     }
 }
 ```
-
+4. Set map width to 512, height to 64, depth to 512.
+5. Press play button
 ## Load model
 To load model in format .vox(for example) you should:
-1. Put model into StreammingAssets/Models folder
+1. Put model into StreammingAssets folder
 2. Make GameObject with MeshFiler and MeshRenderer components and attach this script
 ```csharp
 using VoxCake;
@@ -69,10 +73,12 @@ public class ModelExample
     private void Start()
     {
         MaterialManager.Init();
-        GetComponent<MeshFilter>().mesh = ModelMesh.Get("pathToYourModel", PlayerTeam.Green);
+	string path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
+        GetComponent<MeshFilter>().mesh = ModelMesh.Get(path, PlayerTeam.Green);
 	GetComponent<MeshRenderer>().material = MaterialManager.model;
     }
 }
 ```
+3. Press play button
 ### Showcase
 [![Watch the video](https://steamuserimages-a.akamaihd.net/ugc/976613425704858920/E913B74E84C2C07921E35FD83EBB375A1CA17F51/?imw=1024&imh=576&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true)](https://www.youtube.com/watch?v=nwWKZDr22ts)
