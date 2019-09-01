@@ -48,7 +48,7 @@ public class MapExample : Volume
 {
     private void Start()
     {
-        string path = Application.streamingAssetsPath + "/0048.vxl"; // CHANGE "mapname" to name of your map file!
+        string path = Application.streamingAssetsPath + "/mapname.vxl"; // CHANGE "mapname" to name of your map file!
         uint innerColor = UColor.RGBAToUint(86, 93, 110, 100);
         LoadNearCamera(path, innerColor, Camera.main);
     }
