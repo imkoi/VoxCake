@@ -54,7 +54,7 @@ public class MapExample : Volume
     }
     private void Update()
     {
-        Render();
+        Render(Camera.main);
     }
 }
 ```
