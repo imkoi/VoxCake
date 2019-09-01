@@ -21,57 +21,70 @@ namespace VoxCake
         {
             if (width < Chunk.size || height < Chunk.size || depth < Chunk.size)
             {
-                Chunk.size = (byte)width;
-                Chunk.size = (byte)height;
-                Chunk.size = (byte)depth;
+                Chunk.size = (byte) width;
+                Chunk.size = (byte) height;
+                Chunk.size = (byte) depth;
             }
 
-            wdc = Mathf.CeilToInt((float)width / Chunk.size);
-            hdc = Mathf.CeilToInt((float)height / Chunk.size);
-            ddc = Mathf.CeilToInt((float)depth / Chunk.size);
+            wdc = Mathf.CeilToInt((float) width / Chunk.size);
+            hdc = Mathf.CeilToInt((float) height / Chunk.size);
+            ddc = Mathf.CeilToInt((float) depth / Chunk.size);
 
             data = new uint[width, height, depth];
             chunks = new Chunk[wdc, hdc, ddc];
             for (byte x = 0; x < wdc; x++)
-                for (byte y = 0; y < hdc; y++)
-                    for (byte z = 0; z < ddc; z++)
-                        chunks[x, y, z] = new Chunk(x, y, z, this);
-            
-            octree = new Octree(width,height,depth);
+            for (byte y = 0; y < hdc; y++)
+            for (byte z = 0; z < ddc; z++)
+                chunks[x, y, z] = new Chunk(x, y, z, this);
+
+            octree = new Octree(width, height, depth);
         }
+
         private void LateUpdate()
         {
             Chunk.UpdateStack();
         }
 
-        public void Render(Camera camera)
+        public void Render(Camera camera, RenderMode renderMode)
         {
-            Renderer.UseFrustumCulling(camera, this);
+            if (renderMode == RenderMode.Native)
+                Renderer.UseNative(camera, this);
+            else if (renderMode == RenderMode.FrustumCulling)
+                Renderer.UseFrustumCulling(camera, this);
+            else if (renderMode == RenderMode.OctreeCulling)
+                Renderer.UseOctreeCulling(camera, this);
+            else
+                Log.Error("Unknown RenderMode");
         }
+
         public void Collide(Vector3 position)
         {
             Collision.Collide(position, this);
         }
+
         public void SetData(int x, int y, int z, uint value)
         {
             if (x >= width || x < 0 || y >= height || y < 0 || z >= depth || z < 0)
                 return;
             data[x, y, z] = value;
         }
+
         public uint GetData(int x, int y, int z)
         {
             if (x >= width || x < 0 || y >= height || y < 0 || z >= depth || z < 0)
                 return 1;
             return data[x, y, z];
         }
+
         public void New()
         {
             data = new uint[width, height, depth];
         }
+
         public void Resize()
         {
-
         }
+
         public void Reshade()
         {
             uint[,,] data = new uint[width, height, depth];
@@ -88,8 +101,10 @@ namespace VoxCake
                     }
                 }
             }
+
             this.data = data;
         }
+
         public void SetGrid()
         {
             float width = this.width + 0.08f;
@@ -145,6 +160,7 @@ namespace VoxCake
             };
             gameObject.AddComponent<MeshRenderer>().material = MaterialManager.grid;
         }
+
         public void SetWater(Color32 waterColor, GameObject parent)
         {
             Vector3[] vertices =
@@ -176,14 +192,15 @@ namespace VoxCake
             };
             parent.GetComponent<MeshRenderer>().material = MaterialManager.block;
         }
+
         public void SetWater(int width, int depth, Color32 waterColor, GameObject parent)
         {
             Vector3[] vertices =
             {
-                new Vector3(-width -0.5f, -0.5f, -depth -0.5f), //0
-                new Vector3(-width -0.5f, -0.5f, depth - 0.5f), //1
+                new Vector3(-width - 0.5f, -0.5f, -depth - 0.5f), //0
+                new Vector3(-width - 0.5f, -0.5f, depth - 0.5f), //1
                 new Vector3(width - 0.5f, -0.5f, depth - 0.5f), //2
-                new Vector3(width - 0.5f, -0.5f, -depth -0.5f) //3
+                new Vector3(width - 0.5f, -0.5f, -depth - 0.5f) //3
             };
             Color32[] colors32 =
             {
@@ -207,65 +224,77 @@ namespace VoxCake
             };
             parent.GetComponent<MeshRenderer>().material = MaterialManager.block;
         }
-        public void SaveMap(string name, uint color)
+
+        public void Save(string name, uint color, VolumeFormat volumeFormat)
         {
-            VolumeIO.SaveMap(name, color, this);
+            if(volumeFormat == VolumeFormat.vxl)
+                VolumeIO.SaveMap(name, color, this);
+            else if(volumeFormat == VolumeFormat.vox)
+                VolumeIO.SaveModel(name, this);
+            else 
+                Log.Error("Unknown VolumeFormat");
         }
-        public void OpenModel(string name)
+
+        public void Load(string name, uint innerColor, Camera camera, VolumeFormat volumeFormat, LoadMode loadMode)
         {
-            VolumeIO.OpenModel(name, this);
-            if (width < 17 && depth < 17)
-            {
+            if(volumeFormat == VolumeFormat.vxl)
+                VolumeIO.OpenMap(name, innerColor, this);
+            else if (volumeFormat == VolumeFormat.vox)
+                VolumeIO.OpenModel(name, this);
+            else if (volumeFormat == VolumeFormat.kv6)
+                Log.Error("kv6 loader not implemented yet");
+            else
+                Log.Error("Unknown VolumeFormat");
+
+            if (width <= Chunk.size && height <= Chunk.size && depth <= Chunk.size)
                 Chunk.Add(new Chunk(0, 0, 0, this));
-            }
             else
             {
-                for (byte x = 0; x < wdc; x++)
+                if (loadMode == LoadMode.Linear)
                 {
-                    for (byte y = 0; y < hdc; y++)
+                    for (byte x = 0; x < wdc; x++)
                     {
-                        for (byte z = 0; z < ddc; z++)
+                        for (byte y = 0; y < hdc; y++)
                         {
-                            Chunk.Add(new Chunk(x, y, z, this));
+                            for (byte z = 0; z < ddc; z++)
+                            {
+                                Chunk.Add(new Chunk(x, y, z, this));
+                            }
                         }
                     }
                 }
-            }
-        }
-        public void SaveModel(string name)
-        {
-            VolumeIO.SaveModel(name, this);
-        }
-        public void LoadNearCamera(string name, uint innerColor, Camera camera)
-        {
-            VolumeIO.OpenMap(name, innerColor, this);
-
-            int camX = Mathf.RoundToInt(camera.transform.position.x / Chunk.size);
-            int camY = Mathf.RoundToInt(camera.transform.position.y / Chunk.size);
-            int camZ = Mathf.RoundToInt(camera.transform.position.z / Chunk.size);
-            List<Chunk> chunkList = new List<Chunk>();
-
-            for (byte x = 0; x < wdc; x++)
-            {
-                for (byte z = 0; z < ddc; z++)
+                else if (loadMode == LoadMode.Near)
                 {
-                    for (byte y = 0; y < hdc; y++)
+                    int camX = Mathf.RoundToInt(camera.transform.position.x / Chunk.size);
+                    int camY = Mathf.RoundToInt(camera.transform.position.y / Chunk.size);
+                    int camZ = Mathf.RoundToInt(camera.transform.position.z / Chunk.size);
+                    List<Chunk> chunkList = new List<Chunk>();
+
+                    for (byte x = 0; x < wdc; x++)
                     {
-                        Chunk chunk = new Chunk(x, y, z, this);
-                        chunk.sqrDistanceToCamera =
-                            (camX - x) * (camX - x) +
-                            (camY - y) * (camY - y) +
-                            (camZ - z) * (camZ - z);
-                        chunkList.Add(chunk);
+                        for (byte z = 0; z < ddc; z++)
+                        {
+                            for (byte y = 0; y < hdc; y++)
+                            {
+                                Chunk chunk = new Chunk(x, y, z, this);
+                                chunk.sqrDistanceToCamera =
+                                    (camX - x) * (camX - x) +
+                                    (camY - y) * (camY - y) +
+                                    (camZ - z) * (camZ - z);
+                                chunkList.Add(chunk);
+                            }
+                        }
+                    }
+
+                    chunkList.Sort();
+                    foreach (Chunk chunk in chunkList)
+                    {
+                        Chunk.Add(chunk);
                     }
                 }
             }
-            chunkList.Sort();
-            foreach (Chunk chunk in chunkList)
-            {
-                Chunk.Add(chunk);
-            }
         }
+
         public void SetVolumeCollider()
         {
             Vector3[] vertices =
@@ -318,6 +347,7 @@ namespace VoxCake
                 triangles = triangles
             };
         }
+
         public void SetVolumeCollider(int width, int height, int depth, GameObject parent)
         {
             Vector3[] vertices =
@@ -393,7 +423,7 @@ namespace VoxCake
             if (b < 0) b = 1;
             if (b > 255) b = 255;
 
-            return UColor.RGBAToUint((byte)r, (byte)g, (byte)b, 100);
+            return UColor.RGBAToUint((byte) r, (byte) g, (byte) b, 100);
         }
     }
 }
