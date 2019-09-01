@@ -38,7 +38,7 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
 Well, i think that at first, you would see the fast results, dont you?
 Okay, let`s create your first voxel volume in few lines of code! To make that you should:
 1. Download some map. (You could find it here: http://aos.party/)
-2. Put map into StreammingAssets folder
+2. Put map into StreamingAssets folder
 3. Make GameObject and attach this script:
 ```csharp
 using VoxCake;
@@ -62,7 +62,7 @@ public class MapExample : Volume
 5. Press play button
 ## Load model
 To load model in format .vox(for example) you should:
-1. Put model into StreammingAssets folder
+1. Put model into StreamingAssets folder
 2. Make GameObject with MeshFiler and MeshRenderer components and attach this script
 ```csharp
 using VoxCake;
