@@ -7,11 +7,14 @@ public static class Renderer
 {
     public static void UseNative(Camera camera, Volume volume)
     {
-        for (int x = 0; x < volume.chunks.GetLength(0); x++)
+        int mx = volume.chunks.GetLength(0);
+        int my = volume.chunks.GetLength(1);
+        int mz = volume.chunks.GetLength(2);
+        for (int x = 0; x < mx; x++)
         {
-            for (int y = 0; y < volume.chunks.GetLength(1); y++)
+            for (int y = 0; y < my; y++)
             {
-                for (int z = 0; z < volume.chunks.GetLength(2); z++)
+                for (int z = 0; z < mz; z++)
                 {
                     RenderChunk(volume.chunks[x, y, z]);
                 }
@@ -21,8 +24,9 @@ public static class Renderer
 
     public static void UseFrustumCulling(Camera camera, Volume volume)
     {
+        Vector3 cameraPos = camera.transform.position;
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
-        int[] view = GetChunksInDistance(camera, volume.wdc, volume.hdc, volume.ddc, Chunk.size);
+        int[] view = GetChunksInDistance(camera, volume.sizeChunks, Chunk.size);
 
         int vxmin = view[0];
         int vxmax = view[1];
@@ -41,8 +45,10 @@ public static class Renderer
                     {
                         Vector3 min = chunk.min;
                         Vector3 max = chunk.max;
-                        if (InFrustum(min, max, planes))
-                            RenderChunkUnsafe(chunk);
+                        Vector3 distance = chunk.position - cameraPos;
+                        if(distance.magnitude < RenderSettings.viewDistance)
+                            if (InFrustum(min, max, planes))
+                                RenderChunkUnsafe(chunk);
                     }
                 }
             }
@@ -63,7 +69,7 @@ public static class Renderer
         Vector3 distance = node.position - cameraPos;
         if (nodeDepth == 0)
         {
-            if (distance.magnitude < 1024)
+            if (true) // distance.magnitude < 1024
             {
                 if (node.subNodes != null && InFrustum(min, max, planes))
                     for (int i = 0; i < node.subNodes.Length; i++)
@@ -81,7 +87,7 @@ public static class Renderer
         }
         else
         {
-            if (distance.magnitude < 1024/nodeDepth)
+            if (true) //distance.magnitude < 1024/nodeDepth
             {
                 if (node.subNodes != null && InFrustum(min, max, planes))
                     for (int i = 0; i < node.subNodes.Length; i++)
@@ -124,14 +130,14 @@ public static class Renderer
             0);
     }
 
-    private static int[] GetChunksInDistance(Camera camera, int wdc, int hdc, int ddc, int chunkSize)
+    private static int[] GetChunksInDistance(Camera camera, Vector3Int whd, int chunkSize)
     {
         Vector3 cp = camera.transform.position;
         int camX = Mathf.RoundToInt(cp.x / chunkSize);
         int camY = Mathf.RoundToInt(cp.y / chunkSize);
         int camZ = Mathf.RoundToInt(cp.z / chunkSize);
 
-        int vd = RenderSettings.viewDistance;
+        int vd = (int)RenderSettings.viewDistance;
         int cxMin = camX - vd;
         int cxMax = camX + vd;
         int cyMin = camY - vd;
@@ -140,11 +146,11 @@ public static class Renderer
         int czMax = camZ + vd;
 
         if (cxMin < 0) cxMin = 0;
-        if (cxMax > wdc) cxMax = wdc;
+        if (cxMax > whd.x) cxMax = whd.x;
         if (cyMin < 0) cyMin = 0;
-        if (cyMax > hdc) cyMax = hdc;
+        if (cyMax > whd.y) cyMax = whd.y;
         if (czMin < 0) czMin = 0;
-        if (czMax > ddc) czMax = ddc;
+        if (czMax > whd.z) czMax = whd.z;
 
         return new int[6] {cxMin, cxMax, cyMin, cyMax, czMin, czMax};
     }

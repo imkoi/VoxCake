@@ -196,12 +196,14 @@ namespace VoxCake
 
         public static bool Hit(byte mode, float maxDistance, out Vector3Int point, Camera camera, Volume volume)
         {
-            float gx0 = camera.transform.position.x;
-            float gy0 = camera.transform.position.y;
-            float gz0 = camera.transform.position.z;
-            float rayX = camera.transform.forward.x;
-            float rayY = camera.transform.forward.y;
-            float rayZ = camera.transform.forward.z;
+            Vector3 cpos = camera.transform.position;
+            Vector3 cfor = camera.transform.forward;
+            float gx0 = cpos.x;
+            float gy0 = cpos.y;
+            float gz0 = cpos.z;
+            float rayX = cfor.x;
+            float rayY = cfor.y;
+            float rayZ = cfor.z;
 
             float gx1 = gx0 + rayX * maxDistance;
             float gy1 = gy0 + rayY * maxDistance;
@@ -241,9 +243,9 @@ namespace VoxCake
             float derrx = sx * vyvz;
             float derry = sy * vxvz;
             float derrz = sz * vxvy;
-
+ 
             int gxPre = gx, gyPre = gy, gzPre = gz;
-            while (true && CameraInVolumeBounds(camera, volume))
+            while (true && PositionInVolumeBounds(cpos, volume)) //&& PositionInVolumeBounds(cpos, volume)
             {
                 switch (mode)
                 {
@@ -292,11 +294,11 @@ namespace VoxCake
             return false;
         }
 
-        private static bool CameraInVolumeBounds(Camera camera, Volume volume)
+        private static bool PositionInVolumeBounds(Vector3 position, Volume volume)
         {
-            if (camera.transform.position.x < 0 || camera.transform.position.x >= volume.width ||
-                camera.transform.position.y < 0 || camera.transform.position.y >= volume.height ||
-                camera.transform.position.z < 0 || camera.transform.position.z >= volume.depth)
+            if (position.x < 0 || position.x >= volume.width ||
+                position.y < 0 || position.y >= volume.height ||
+                position.y < 0 || position.z >= volume.depth)
                 return false;
             return true;
         }

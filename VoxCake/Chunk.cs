@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using VoxCake.Common;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace VoxCake
 {
@@ -28,8 +28,8 @@ namespace VoxCake
             this.y = y;
             this.z = z;
             position = new Vector3(x*cs, y*cs, z*cs);
-            min = new Vector3((float)(x*csph), (float)(y*csph),(float)(z*csph));
-            max = new Vector3((float)(x*csph+cs), (float)(y*csph+cs),(float)(z*csph+cs));
+            min = new Vector3((x*csph), y*csph,z*csph);
+            max = new Vector3(x*csph+cs, y*csph+cs,z*csph+cs);
             
             this.volume = volume;
         }
@@ -56,6 +56,7 @@ namespace VoxCake
                         Update(chunk.x, chunk.y, chunk.z, chunk.volume);
                     }
                 }
+                RenderSettings.SetViewDistance(RenderSettings.viewDistance+0.25f);
             }
         }
 

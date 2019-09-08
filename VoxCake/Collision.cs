@@ -7,12 +7,12 @@ namespace VoxCake
         public static int width = 2;
         public static int height = 2;
         public static int depth = 2;
-        public static int playerHeight = 0;
+        public static float playerHeight;
         public static GameObject[,,] colliders;
 
         public static void Init()
         {
-            int h = height + playerHeight;
+            int h = Mathf.CeilToInt(height + playerHeight);
             colliders = new GameObject[width, h, depth];
             GameObject parent = new GameObject("Colliders");
             for (int x = 0; x < width; x++)
@@ -32,10 +32,14 @@ namespace VoxCake
 
         public static void Collide(Vector3 position, Volume volume)
         {
-            int h = height + playerHeight;
-            int cx = Mathf.RoundToInt(position.x); //Floor? Ciel? +0.25f? +0.5f?
+            int h = Mathf.CeilToInt(height + playerHeight);
+            int cx = Mathf.RoundToInt(position.x);
             int cy = Mathf.RoundToInt(position.y);
             int cz = Mathf.RoundToInt(position.z);
+            
+//            int cx = Mathf.FloorToInt(position.x);
+//            int cy = Mathf.FloorToInt(position.y);
+//            int cz = Mathf.FloorToInt(position.z);
 
             for (int x = 0; x < width; x++)
             {

@@ -2,7 +2,6 @@
 using VoxCake.Common;
 using System.Collections.Generic;
 
-
 namespace VoxCake
 {
     public class Volume : MonoBehaviour
@@ -10,15 +9,18 @@ namespace VoxCake
         public int width;
         public int height;
         public int depth;
+        public Octree octree;
         [HideInInspector] public uint[,,] data;
         [HideInInspector] public int wdc;
         [HideInInspector] public int hdc;
         [HideInInspector] public int ddc;
         [HideInInspector] public Chunk[,,] chunks;
-        public Octree octree;
+        [HideInInspector] public Vector3Int size;
+        [HideInInspector] public Vector3Int sizeChunks;
 
         private void Awake()
         {
+            size = new Vector3Int(width,height,depth);
             if (width < Chunk.size || height < Chunk.size || depth < Chunk.size)
             {
                 Chunk.size = (byte) width;
@@ -29,13 +31,14 @@ namespace VoxCake
             wdc = Mathf.CeilToInt((float) width / Chunk.size);
             hdc = Mathf.CeilToInt((float) height / Chunk.size);
             ddc = Mathf.CeilToInt((float) depth / Chunk.size);
+            sizeChunks = new Vector3Int(wdc, hdc, ddc);
 
             data = new uint[width, height, depth];
             chunks = new Chunk[wdc, hdc, ddc];
             for (byte x = 0; x < wdc; x++)
-            for (byte y = 0; y < hdc; y++)
-            for (byte z = 0; z < ddc; z++)
-                chunks[x, y, z] = new Chunk(x, y, z, this);
+                for (byte y = 0; y < hdc; y++)
+                    for (byte z = 0; z < ddc; z++)
+                        chunks[x, y, z] = new Chunk(x, y, z, this);
 
             octree = new Octree(width, height, depth);
         }
@@ -43,6 +46,7 @@ namespace VoxCake
         private void LateUpdate()
         {
             Chunk.UpdateStack();
+            PillarManager.UpdateStack();
         }
 
         public void Render(Camera camera, RenderMode renderMode)
