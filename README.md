@@ -14,13 +14,14 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
         - [X] Voxel sphere;
         - [ ] Voxel ellipse;
         - [ ] Voxel filling; 
+	- [ ] Voxel painting;
 - [X] Physics:
     - [X] Raycast for voxel volumes;
     - [X] Collision for voxel volumes;
     - [X] Physic for voxel volumes;
 - [X] Rendering:
-    - [X] Chunk octree frustum culling; (Glitched right now)
-    - [X] Chunk frustum culling;
+    - [X] Chunk octree frustum culling; 
+    - [X] Chunk frustum culling; (Glitched right now)
     - [X] Chunk loading near camera;
 - [X] Saving and Loading of voxel volumes:
     - [X] .vcmap;
@@ -74,7 +75,7 @@ public class ModelExample
     {
         MaterialManager.Init();
 	string path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
-        GetComponent<MeshFilter>().mesh = ModelMesh.Get(path, PlayerTeam.Green);
+        GetComponent<MeshFilter>().mesh = ModelMesh.Get(path, 0);
 	GetComponent<MeshRenderer>().material = MaterialManager.model;
     }
 }
