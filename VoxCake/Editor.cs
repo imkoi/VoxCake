@@ -24,12 +24,24 @@ namespace VoxCake
                 _startPoint = point;
             else _startPoint = new Vector3Int(-6, -6, -6);
         }
+        public static void SetEndPoint(byte mode)
+        {
+            Vector3Int point;
+            if (Raycast.Hit(mode, 256, out point, Camera.main, volume))
+                _endPoint = point;
+            else _endPoint = new Vector3Int(-6, -6, -6);
+        }
         public static void SetVoxel(byte mode, bool buffered = false, bool usePhysics = false)
         {
             byte raycastMode = mode == 1 ? (byte)1 : (byte)0;
             SetEndPoint(raycastMode);
             if (buffered)
-                CommandBuffer.Do(new Block { operation = mode, data = new VoxelBuffered(_endPoint.x, _endPoint.y, _endPoint.z) }, volume);
+                CommandBuffer.Do(
+                    new Block(),
+                    mode,
+                    _endPoint,
+                    _endPoint,
+                    volume);
             else
             {
                 if (mode == 0)
@@ -57,7 +69,7 @@ namespace VoxCake
             SetEndPoint(raycastMode);
 
             if (buffered)
-                CommandBuffer.Do(new Block { operation = mode, data = new VoxelBuffered(_endPoint.x, _endPoint.y, _endPoint.z) }, volume);
+                CommandBuffer.Do(new Line(), mode, _startPoint, _endPoint, volume);
             else
             {
                 uint value = mode == 0 ? 0 : color;
@@ -148,42 +160,62 @@ namespace VoxCake
                         prevY = yCopy;
                         prevZ = zCopy;
                     }
+                    int count = stack.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        Chunk chunk = stack[i];
+                        Chunk.Add(chunk);
+                    }
                 }
                 else
                 {
                     volume.SetData(x0, y0, z0, value);
                     UpdateChunk(x0, y0, z0, stack);
                 }
-                foreach (Chunk chunk in stack)
-                    Chunk.Add(chunk);
             }
         }
-        public static void SetOctagon(byte mode)
+        public static void SetOctagon(byte mode, bool buffered = false, bool usePhysics = false)
         {
             byte raycastMode = mode == 1 ? (byte)1 : (byte)0;
             SetEndPoint(raycastMode);
 
-            uint value = mode == 0 ? 0 : color;
-            int xMin = _startPoint.x < _endPoint.x ? _startPoint.x : _endPoint.x;
-            int xMax = _startPoint.x > _endPoint.x ? _startPoint.x : _endPoint.x;
-            int yMin = _startPoint.y < _endPoint.y ? _startPoint.y : _endPoint.y;
-            int yMax = _startPoint.y > _endPoint.y ? _startPoint.y : _endPoint.y;
-            int zMin = _startPoint.z < _endPoint.z ? _startPoint.z : _endPoint.z;
-            int zMax = _startPoint.z > _endPoint.z ? _startPoint.z : _endPoint.z;
-            List<Chunk> stack = new List<Chunk>();
-            for (int x = xMin; x < xMax + 1; x++)
+            if (buffered)
             {
-                for (int y = yMin; y < yMax + 1; y++)
+                CommandBuffer.Do(
+                    new Octagon(),
+                    mode,
+                    _startPoint,
+                    _endPoint,
+                    volume);
+            }
+            else
+            {
+                uint value = mode == 0 ? 0 : color;
+                int xMin = _startPoint.x < _endPoint.x ? _startPoint.x : _endPoint.x;
+                int xMax = _startPoint.x > _endPoint.x ? _startPoint.x : _endPoint.x;
+                int yMin = _startPoint.y < _endPoint.y ? _startPoint.y : _endPoint.y;
+                int yMax = _startPoint.y > _endPoint.y ? _startPoint.y : _endPoint.y;
+                int zMin = _startPoint.z < _endPoint.z ? _startPoint.z : _endPoint.z;
+                int zMax = _startPoint.z > _endPoint.z ? _startPoint.z : _endPoint.z;
+                List<Chunk> stack = new List<Chunk>();
+                for (int x = xMin; x < xMax + 1; x++)
                 {
-                    for (int z = zMin; z < zMax + 1; z++)
+                    for (int y = yMin; y < yMax + 1; y++)
                     {
-                        volume.SetData(x, y, z, value);
-                        UpdateChunk(x, y, z, stack);
+                        for (int z = zMin; z < zMax + 1; z++)
+                        {
+                            volume.SetData(x, y, z, value);
+                            UpdateChunk(x, y, z, stack);
+                        }
                     }
                 }
+                int count = stack.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    Chunk chunk = stack[i];
+                    Chunk.Add(chunk);
+                }
             }
-            foreach (Chunk chunk in stack)
-                Chunk.Add(chunk);
         }
         public static void SetSphere(byte mode)
         {
@@ -229,8 +261,12 @@ namespace VoxCake
                     }
                 }
             }
-            foreach (Chunk chunk in stack)
+            int count = stack.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Chunk chunk = stack[i];
                 Chunk.Add(chunk);
+            }
         }
         public static void SetExplosion(int x, int y, int z, int radius, byte damage, Volume volume)
         {
@@ -262,20 +298,12 @@ namespace VoxCake
                     }
                 }
             }
-        }
+        } //TODO: REWRITE THIS SHIT!
         public static void GetVoxelColor()
         {
             color = volume.GetData(_startPoint.x, _startPoint.y, _startPoint.z);
         }
-
-        private static void SetEndPoint(byte mode)
-        {
-            Vector3Int point;
-            if (Raycast.Hit(mode, 256, out point, Camera.main, volume))
-                _endPoint = point;
-            else _endPoint = new Vector3Int(-6, -6, -6);
-        }
-        private static void UpdateChunk(int x, int y, int z, List<Chunk> stack)
+        public static void UpdateChunk(int x, int y, int z, List<Chunk> stack)
         {
             byte ux = (byte)(x / Chunk.size);
             byte uy = (byte)(y / Chunk.size);
@@ -285,26 +313,31 @@ namespace VoxCake
             int xp = x - Chunk.size * ux;
             int yp = y - Chunk.size * uy;
             int zp = z - Chunk.size * uz;
-            if (xp == Chunk.size - 1 && ux != volume.wdc - 1) StackAdd(ux + 1, uy, uz, stack);
+            int csm = Chunk.size - 1;
+            if (xp == csm && ux != volume.wdc - 1) StackAdd(ux + 1, uy, uz, stack);
             if (xp == 0 && ux != 0) StackAdd(ux - 1, uy, uz, stack);
-            if (yp == Chunk.size - 1 && uy != volume.hdc - 1) StackAdd(ux, uy + 1, uz, stack);
+            if (yp == csm && uy != volume.hdc - 1) StackAdd(ux, uy + 1, uz, stack);
             if (yp == 0 && uy != 0) StackAdd(ux, uy - 1, uz, stack);
-            if (zp == Chunk.size - 1 && uz != volume.ddc - 1) StackAdd(ux, uy, uz + 1, stack);
+            if (zp == csm && uz != volume.ddc - 1) StackAdd(ux, uy, uz + 1, stack);
             if (zp == 0 && uz != 0) StackAdd(ux, uy, uz - 1, stack);
         }
-        private static void StackAdd(int ux, int uy, int uz, List<Chunk> stack)
+        public static void StackAdd(int ux, int uy, int uz, List<Chunk> stack)
         {
             if (!StackContains(ux, uy, uz, stack))
-            {
                 stack.Add(new Chunk((byte)ux, (byte)uy, (byte)uz, volume));
-            }
         }
-        private static bool StackContains(int x, int y, int z, List<Chunk> stack)
+        public static bool StackContains(int x, int y, int z, List<Chunk> stack)
         {
-            foreach (Chunk chunk in stack) if (chunk.x == x && chunk.y == y && chunk.z == z) return true;
+            int count = stack.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Chunk chunk = stack[i];
+                if (chunk.x == x && chunk.y == y && chunk.z == z) 
+                    return true;
+            }
             return false;
         }
-        private static void Swap<T>(ref T x, ref T y)
+        public static void Swap<T>(ref T x, ref T y)
         {
             T tmp = y;
             y = x;

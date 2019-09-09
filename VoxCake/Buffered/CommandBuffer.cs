@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace VoxCake.Buffered
 {
@@ -47,7 +48,7 @@ namespace VoxCake.Buffered
             }
         }
 
-        public static void Do(ICommand command, Volume volume)
+        public static void Do(ICommand command,byte mode, Vector3Int start, Vector3Int end, Volume volume)
         {
             if (lastExecuted + 1 < commands.Count)
             {
@@ -58,7 +59,7 @@ namespace VoxCake.Buffered
                 }
                 lastSaved = -1;
             }
-            command.Do(volume);
+            command.Do(mode, start, end, volume);
 
             if (!commands.Contains(command)){
                 commands.Add(command);

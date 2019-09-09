@@ -1,8 +1,10 @@
-﻿namespace VoxCake.Buffered
+﻿using UnityEngine;
+
+namespace VoxCake.Buffered
 {
-    public class Paint : ICommand
+    public class Paint : ICommand //TODO: Implement paint command
     {
-        public void Do(Volume volume)
+        public void Do(byte mode, Vector3Int start, Vector3Int end, Volume volume)
         {
             
         }

@@ -10,16 +10,14 @@ namespace VoxCake
     {
         public static bool center = false;
         public static float scale = 15f;
-        public static float[] ambientOcclusion = new[] { 7f, 4f, 2.5f };
-        public static float[] edgeLighting = new[] { 14f, 12f, 8f };
-
+        
         private static byte _team;
         private static byte _width;
         private static byte _depth;
         private static byte _height;
         private static uint[,,] _data;
 
-        public static Mesh GetCulled(string name, byte team)
+        public static Mesh Get(string name, byte team)
         {
             SetModelData(name);
             _team = team;
@@ -280,11 +278,25 @@ namespace VoxCake
 
         private static void SetModelData(string name)
         {
-            Vox.Load(name);
-            _width = (byte)Vox.width;
-            _height = (byte)Vox.height;
-            _depth = (byte)Vox.depth;
-            _data = Vox.data;
+            if(name.Contains(".vox"))
+            {
+                Vox.Load(name);
+                _data = Vox.data;
+            }
+            else if (name.Contains(".kv6"))
+            {
+                Kv6.Load(name);
+                _data = Kv6.data;
+            }
+            else
+            {
+                Log.Error("ModelMesh: Unknown model format");
+                return;
+            }
+            _width = (byte)_data.GetLength(0);
+            _height = (byte)_data.GetLength(1);
+            _depth = (byte)_data.GetLength(2);
+            Debug.Log(new Vector3Int(_width, _height, _depth));
         }
 
         private static void SetFace(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, int index, uint inputColor, float light,
@@ -341,77 +353,62 @@ namespace VoxCake
         }
         private static Color32 GetLight(Color32 color, uint b1, uint b2, uint b3, uint b11, uint b12, uint b13, byte vertex, ref bool flip)
         {
-            Color32[] le = new[] {
-                CalculateLight(color.r, color.g, color.b, edgeLighting[0]),
-                CalculateLight(color.r, color.g, color.b, edgeLighting[1]),
-                CalculateLight(color.r, color.g, color.b, edgeLighting[2])
-            };
-
-            if (b1 == 0 && b3 == 0 && b11 == 0 && b13 == 0) // true
+            Vector3 edgeLighting = new Vector3( 14f, 12f, 8f );
+            if (b1 == 0 && b3 == 0 && b11 == 0 && b13 == 0)
             {
-                if (vertex == 1 || vertex == 3) flip = true;
-                return le[2];
+                if (vertex == 0 || vertex == 2) flip = true;
+                return CalculateLight(color.r, color.g, color.b, edgeLighting.z);
             }
-
-            else if ((b1 == 0 && b11 == 0 && b2 == 0 && b12 == 0) || (b2 == 0 && b12 == 0 && b3 == 0 && b13 == 0))
+            if ((b1 == 0 && b11 == 0 && b2 == 0 && b12 == 0) || (b2 == 0 && b12 == 0 && b3 == 0 && b13 == 0))
             {
-                return le[1];
+                return CalculateLight(color.r, color.g, color.b, edgeLighting.y);
             }
-
-            else if ((b1 == 0 && b11 == 0) || (b3 == 0 && b13 == 0)) //c
+            if ((b1 == 0 && b11 == 0) || (b3 == 0 && b13 == 0))
             {
-                return le[0];
+                return CalculateLight(color.r, color.g, color.b, edgeLighting.x);
             }
-
-            else if (b2 == 0 && b12 == 0) // true
+            if (b2 == 0 && b12 == 0)
             {
-                if (vertex == 1 || vertex == 3) flip = true;
-                return le[0];
+                if (vertex == 0 || vertex == 2) flip = true;
+                return CalculateLight(color.r, color.g, color.b, edgeLighting.x);
             }
             return color;
         }
         private static Color32 GetAmbient(Color32 color, uint b1, uint b2, uint b3, uint vertex, ref bool flip)
         {
-            Color32[] ao = new[] { CalculateAo(color.r, color.g, color.b, ambientOcclusion[0]),
-            CalculateAo(color.r, color.g, color.b, ambientOcclusion[1]),
-            CalculateAo(color.r, color.g, color.b, ambientOcclusion[2]) };
-
+            Vector3 ambientOcclusion = new Vector3( 7f, 4f, 2.5f );
             if (b1 != 0 && b3 != 0)
             {
-                if (vertex == 1 || vertex == 3) flip = true;
-                return ao[2];
+                if (vertex == 0 || vertex == 2) flip = true;
+                return CalculateAmbient(color.r, color.g, color.b, ambientOcclusion.z);
             }
-
-            else if ((b1 != 0 && b2 != 0) || (b2 != 0 && b3 != 0))
+            if ((b1 != 0 && b2 != 0) || (b2 != 0 && b3 != 0))
             {
-                if (vertex == 1 || vertex == 3) flip = true;
-                return ao[1];
+                return CalculateAmbient(color.r, color.g, color.b, ambientOcclusion.y);
             }
-
-            else if (b1 != 0 || b3 != 0)
+            if (b1 != 0 || b3 != 0)
             {
-                return ao[0];
+                return CalculateAmbient(color.r, color.g, color.b, ambientOcclusion.x);
             }
-
-            else if (b2 != 0)
+            if (b2 != 0)
             {
-                if (vertex == 1 || vertex == 3) flip = true;
-                return ao[0];
+                if (vertex == 0 || vertex == 2) flip = true;
+                return CalculateAmbient(color.r, color.g, color.b, ambientOcclusion.x);
             }
             return color;
         }
-        private static Color32 CalculateAo(byte r, byte g, byte b, float ao)
+        private static Color32 CalculateAmbient(byte r, byte g, byte b, float ao)
         {
             float fr = r - r / ao;
             float fg = g - g / ao;
             float fb = b - b / ao;
 
             if (fr > 255) fr = 255;
-            if (fr < 0) fr = 0;
+            else if (fr < 0) fr = 0;
             if (fg > 255) fg = 255;
-            if (fg < 0) fg = 0;
+            else if(fg < 0) fg = 0;
             if (fb > 255) fb = 255;
-            if (fb < 0) fb = 0;
+            else if(fb < 0) fb = 0;
 
             return new Color32((byte)fr, (byte)fg, (byte)fb, 255);
         }
@@ -422,42 +419,13 @@ namespace VoxCake
             float fb = b + b / ao;
 
             if (fr > 255) fr = 255;
-            if (fr < 0) fr = 0;
+            else if (fr < 0) fr = 0;
             if (fg > 255) fg = 255;
-            if (fg < 0) fg = 0;
+            else if (fg < 0) fg = 0;
             if (fb > 255) fb = 255;
             if (fb < 0) fb = 0;
 
             return new Color32((byte)fr, (byte)fg, (byte)fb, 255);
-        }
-        private static Color32 GetSideShading(Color32 color, int side, bool flip)
-        {
-            float lightX = 0.2f;
-            float lightPy = 0;
-            float lightNy = 0.4f;
-            float lightZ = 0.25f;
-
-            if (side == 0) return new Color32(
-                (byte)(color.r - color.r * lightX),
-                (byte)(color.g - color.g * lightX),
-                (byte)(color.b - color.b * lightX),
-                255);
-            if (side == 1 && flip == false) return new Color32(
-                (byte)(color.r - color.r * lightPy),
-                (byte)(color.g - color.g * lightPy),
-                (byte)(color.b - color.b * lightPy),
-                255);
-            if (side == 1 && flip == true) return new Color32(
-                (byte)(color.r - color.r * lightNy),
-                (byte)(color.g - color.g * lightNy),
-                (byte)(color.b - color.b * lightNy),
-                255);
-            if (side == 2) return new Color32(
-                (byte)(color.r - color.r * lightZ),
-                (byte)(color.g - color.g * lightZ),
-                (byte)(color.b - color.b * lightZ),
-                255);
-            return new Color32();
         }
     }
 }

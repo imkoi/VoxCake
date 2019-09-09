@@ -1,11 +1,7 @@
 ﻿using System.IO;
-using UnityEngine;
 
 public static class Kv6
 {
-    public static int width;
-    public static int height;
-    public static int depth;
     public static uint[,,] data;
 
     private struct Kv6Block
@@ -14,7 +10,7 @@ public static class Kv6
         public int zpos;
     }
 
-    private static void LoadVoxelModel(Stream stream, out Vector3 pivot)
+    private static uint[,,] GetData(Stream stream)
     {
         var reader = new BinaryReader(stream);
         {
@@ -44,23 +40,18 @@ public static class Kv6
         for (int i = 0; i < blocks.Length; ++i)
         {
             blocks[i].color = reader.ReadUInt32();
-            blocks[i].zpos = (int)reader.ReadUInt16();
+            blocks[i].zpos = reader.ReadUInt16();
             reader.ReadUInt16();
         }
 
         var xyoffset = new int[xsiz * ysiz];
         for (int i = 0; i < xsiz; ++i)
-        {
             reader.ReadInt32();
-        }
         for (int i = 0; i < xyoffset.Length; ++i)
-        {
             xyoffset[i] = (int)reader.ReadUInt16();
-        }
 
         int pos = 0;
-        /*
-        var model = new VoxelModel(xsiz, ysiz, zsiz);
+        var model = new uint [xsiz, ysiz, zsiz];
         for (int x = 0; x < xsiz; ++x)
         {
             for (int y = 0; y < ysiz; ++y)
@@ -74,35 +65,20 @@ public static class Kv6
                 }
             }
         }
-        pivot = new Vector3(xpivot, ypivot, zpivot);
-        return model;*/
-        pivot = new Vector3();
-    }
 
-    public static void LoadVoxelModel(Stream stream)
-    {
-        //Vector3 dummy;
-        //return LoadVoxelModel(stream, out dummy, progress);
-
-    }
-    /*
-    public static void LoadVoxelModel(byte[] bytes, out Vector3 pivot)
-    {
-        //return LoadVoxelModel(new System.IO.MemoryStream(bytes, false), out pivot, progress);
-    } */
-
-    public static void LoadVoxelModel(byte[] bytes)
-    {
-        //return LoadVoxelModel(new System.IO.MemoryStream(bytes, false), progress);
+        return model;
     }
 
     public static void Load(string path)
     {
-        /*
-        using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+        using (Stream stream = new FileStream(path, FileMode.Open))
         {
-            var rowData = FromMagica(reader);
+            var rowData = GetData(stream);
+            data = rowData;
 
+            int width = rowData.GetLength(0);
+            int depth = rowData.GetLength(1);
+            int height = rowData.GetLength(2);
             data = new uint[width, height, depth];
             for (int x = 0; x < width; x++)
             {
@@ -110,11 +86,10 @@ public static class Kv6
                 {
                     for (int z = 0; z < depth; z++)
                     {
-                        int voxel = (x * height + y) * depth + z;
-                        data[x, y, z] = rowData[voxel];
+                        data[x, y, z] = rowData[x,z,y];
                     }
                 }
             }
-        }*/
+        }
     }
 }

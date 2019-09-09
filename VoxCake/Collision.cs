@@ -36,10 +36,6 @@ namespace VoxCake
             int cx = Mathf.RoundToInt(position.x);
             int cy = Mathf.RoundToInt(position.y);
             int cz = Mathf.RoundToInt(position.z);
-            
-//            int cx = Mathf.FloorToInt(position.x);
-//            int cy = Mathf.FloorToInt(position.y);
-//            int cz = Mathf.FloorToInt(position.z);
 
             for (int x = 0; x < width; x++)
             {

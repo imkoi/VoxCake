@@ -1,47 +1,33 @@
-﻿namespace VoxCake.Buffered
+﻿using UnityEngine;
+
+namespace VoxCake.Buffered
 {
     public class Block : ICommand
     {
-        public byte operation;
-        public VoxelBuffered data;
+        private VoxelBuffered data;
 
-        public void Do(Volume volume)
+        public void Do(byte mode, Vector3Int start, Vector3Int end, Volume volume)
         {
-            data.previousColor = volume.GetData(data.x, data.y, data.z);
-            if (operation == 0)
-            {
-                data.currentColor = 0;
-                volume.SetData(data.x, data.y, data.z, 0);
-            }
-            else if (operation == 1)
-            {
-                data.currentColor = Editor.color;
-                volume.SetData(data.x, data.y, data.z, data.currentColor);
-            }
-            else if (operation == 2)
-            {
-                if(data.previousColor != 0 && data.previousColor != 1)
-                {
-                    data.currentColor = Editor.color;
-                    volume.SetData(data.x, data.y, data.z, data.currentColor);
-                }
-            }
-            Chunk.AddForVoxel(data.x, data.y, data.z, volume);
+            uint value = mode == 0 ? 0 : Editor.color;
+            data.x = end.x;
+            data.y = end.y;
+            data.z = end.z;
+            data.previousColor = volume.GetData(end.x, end.y, end.z);
+            data.currentColor = value;
+            Make(volume, value);
         }
         public void Redo(Volume volume)
         {
-            if (operation == 0)
-                volume.SetData(data.x, data.y, data.z, 0);
-            else if (operation == 1)
-                volume.SetData(data.x, data.y, data.z, data.currentColor);
-            else if (operation == 2)
-                volume.SetData(data.x, data.y, data.z, data.currentColor);
-
-            Chunk.AddForVoxel(data.x, data.y, data.z, volume);
+            Make(volume, data.currentColor);
         }
         public void Undo(Volume volume)
         {
-            volume.SetData(data.x, data.y, data.z, data.previousColor);
+            Make(volume, data.previousColor);
+        }
+
+        private void Make(Volume volume, uint value)
+        {
+            volume.SetData(data.x, data.y, data.z, value);
             Chunk.AddForVoxel(data.x, data.y, data.z, volume);
         }
     }
