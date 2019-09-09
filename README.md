@@ -27,7 +27,7 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
     - [X] .vcmap;
     - [X] .vxl;
     - [X] .vcmod;
-    - [ ] .kv6;
+    - [X] .kv6;
     - [X] .vox;
     
 ## Installing
