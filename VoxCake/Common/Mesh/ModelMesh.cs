@@ -1,15 +1,14 @@
-﻿using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using VoxCake.Common;
+using VoxCake.Common.Format;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace VoxCake
 {
     public static class ModelMesh
     {
         public static bool center = false;
-        public static float scale = 15f;
+        public static float scale = 0.16f;
         
         private static byte _team;
         private static byte _width;
@@ -25,9 +24,9 @@ namespace VoxCake
             int faceCount = 0;
             for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < _depth; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    for (int z = 0; z < _height; z++)
+                    for (int z = 0; z < _depth; z++)
                     {
                         if (Data(x, y, z) != 0)
                         {
@@ -88,15 +87,15 @@ namespace VoxCake
                                 uint block28 = Data(x, y + 1, z - 1);
                                 uint block29 = Data(x + 1, y + 1, z - 1);
 
-                                float i = 1 / scale;
-                                float xScale = x / scale - 0.5f;
-                                float yScale = y / scale - 0.5f + i;
-                                float zScale = z / scale - 0.5f;
+                                float i = 1 * scale;
+                                float xScale = x * scale - 0.5f;
+                                float yScale = y * scale - 0.5f + i;
+                                float zScale = z * scale - 0.5f;
                                 if (center)
                                 {
-                                    xScale = x / scale - 0.5f - (float)_width/2;
-                                    yScale = y / scale - 0.5f + i;
-                                    zScale = z / scale - 0.5f - (float)_depth/2;
+                                    xScale = x * scale - 0.5f - (float)_width/2;
+                                    yScale = y * scale - 0.5f + i;
+                                    zScale = z * scale - 0.5f - (float)_depth/2;
                                 }
 
                                 if (block16 == 0)
@@ -278,25 +277,20 @@ namespace VoxCake
 
         private static void SetModelData(string name)
         {
+            VoxelModel voxelModel = null;
             if(name.Contains(".vox"))
-            {
-                Vox.Load(name);
-                _data = Vox.data;
-            }
+                voxelModel = new Vox(name);
             else if (name.Contains(".kv6"))
-            {
-                Kv6.Load(name);
-                _data = Kv6.data;
-            }
+                voxelModel = new Kv6(name);
             else
             {
                 Log.Error("ModelMesh: Unknown model format");
                 return;
             }
-            _width = (byte)_data.GetLength(0);
-            _height = (byte)_data.GetLength(1);
-            _depth = (byte)_data.GetLength(2);
-            Debug.Log(new Vector3Int(_width, _height, _depth));
+            _data = voxelModel?.GetData();
+            _width = (byte)voxelModel?.GetWidth();
+            _height = (byte)voxelModel?.GetHeight();
+            _depth = (byte)voxelModel?.GetDepth();
         }
 
         private static void SetFace(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, int index, uint inputColor, float light,

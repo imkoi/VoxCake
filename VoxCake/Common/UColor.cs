@@ -20,7 +20,10 @@ namespace VoxCake
             byte r = (byte)(value >> 16);
             byte g = (byte)(value >> 8);
             byte b = (byte)(value >> 0);
-            if (a > 0) { return (uint)((a << 24) | (r << 16) | (g << 8) | (b << 0)); }
+            if (r == 0 && g == 0 && b == 0)
+                return 0;
+            if (a != 0) 
+                return (uint)((a << 24) | (r << 16) | (g << 8) | (b << 0));
             return 0;
         }
         public static uint RGBAToUint(byte r, byte g, byte b, byte a)
