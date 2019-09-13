@@ -8,7 +8,7 @@ VoxCake is the framework which provides easy and efficiency work with voxels.
     - [X] Command buffer;
     - [X] Tools:
         - [X] Voxel;
-		- [X] Voxel picker;
+	- [X] Voxel picker;
         - [X] Voxel line;
         - [X] Voxel box;
         - [X] Voxel sphere;
