@@ -53,12 +53,13 @@ namespace VoxCake.Common
             yp /= count;
             zp /= count;
 
-            int xmindcs = xMin / Chunk.size;
-            int ymindcs = yMin / Chunk.size;
-            int zmindcs = zMin / Chunk.size;
-            int xmaxdcs = xMax / Chunk.size + 1;
-            int ymaxdcs = yMax / Chunk.size + 1;
-            int zmaxdcs = zMax / Chunk.size + 1;
+            int cs = Chunk.size;
+            int xmindcs = xMin / cs;
+            int ymindcs = yMin / cs;
+            int zmindcs = zMin / cs;
+            int xmaxdcs = xMax / cs + 1;
+            int ymaxdcs = yMax / cs + 1;
+            int zmaxdcs = zMax / cs + 1;
             for (int cx = xmindcs; cx < xmaxdcs; cx++)
             for (int cy = ymindcs; cy < ymaxdcs; cy++)
             for (int cz = zmindcs; cz < zmaxdcs; cz++)
@@ -122,10 +123,10 @@ namespace VoxCake.Common
             physicConstruction.AddComponent<MeshCollider>().sharedMesh = mesh;
             physicConstruction.AddComponent<MeshRenderer>().material = MaterialManager.pillar;
         }
+
         private static int GetValue(float value, float dim)
         {
             return (int) (value - (dim / 2) + 0.5f);
         }
     }
 }
-

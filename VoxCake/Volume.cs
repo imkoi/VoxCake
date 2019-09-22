@@ -232,9 +232,9 @@ namespace VoxCake
         public void Save(string name, uint color, VolumeFormat volumeFormat)
         {
             if(volumeFormat == VolumeFormat.vxl)
-                VolumeIO.SaveMap(name, color, this);
+                VolumeIO.SaveMap(name + ".vxl", color, this);
             else if(volumeFormat == VolumeFormat.vox)
-                VolumeIO.SaveModel(name, this);
+                VolumeIO.SaveModel(name + ".vox", this);
             else 
                 Log.Error("Unknown VolumeFormat");
         }

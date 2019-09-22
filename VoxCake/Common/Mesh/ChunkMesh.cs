@@ -5,7 +5,6 @@ namespace VoxCake.Common
     public class ChunkMesh
     {
         public static bool modelEditor = true;
-        private const float _scale = 1f;
 
         public static Mesh Get(int chunkX, int chunkY, int chunkZ, Volume volume)
         {
@@ -91,10 +90,10 @@ namespace VoxCake.Common
                                 uint block28 = Data(x, yp, zn, dx, dy, dz, vx, vy, vz, volume);
                                 uint block29 = Data(xp, yp, zn, dx,dy,dz, vx, vy, vz, volume);
 
-                                float xScale = x / _scale;
-                                float yScale = y / _scale + 1f;
-                                float zScale = z / _scale;
-                                float i = 1 / _scale;
+                                float xScale = x;
+                                float yScale = y + 1f;
+                                float zScale = z;
+                                float i = 1;
 
                                 float xScaleP = xScale + i;
                                 float yScaleN = yScale - i;

@@ -49,6 +49,7 @@ namespace VoxCake.Common.Format
             {
                 try
                 {
+					_temp = new List<Voxel>();
                     BindData(reader);
                     data = new uint[width, height, depth];
                     int count = _temp.Count;
@@ -57,8 +58,6 @@ namespace VoxCake.Common.Format
                         Voxel v = _temp[i];
                         data[v.x, v.y, depth - v.z - 1] = v.value;
                     }
-
-                    _temp = null;
                 }
                 catch
                 {

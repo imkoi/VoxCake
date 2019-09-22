@@ -79,7 +79,7 @@ namespace VoxCake.Common
                     }
                 }
             }
-            catch(Exception e)
+            catch
             {
                 Log.Error("VolumeIO: OpenMap();", true);
                 Application.Quit();
@@ -87,48 +87,51 @@ namespace VoxCake.Common
         }
         public static void SaveMap(string path, uint innerColor, Volume volume)
         {
+            int w = volume.width;
+            int h = volume.height;
+            int d = volume.depth;
             List<byte> bytes = new List<byte>();
-            bool[,,] map = new bool[volume.width, volume.depth, volume.height];
-            uint[,,] color = new uint[volume.width, volume.depth, volume.height];
-            for (int x = 0; x < volume.width; x++)
+            bool[,,] map = new bool[w, d, h];
+            uint[,,] color = new uint[w, d, h];
+            for (int x = 0; x < w; x++)
             {
-                for (int y = 0; y < volume.height; y++)
+                for (int y = 0; y < h; y++)
                 {
-                    for (int z = 0; z < volume.depth; z++)
+                    for (int z = 0; z < d; z++)
                     {
-                        if (volume.data[z, volume.height - y - 1, x] == 0x00000000) map[x, z, y] = false;
+                        uint voxel = volume.data[z, h - y - 1, x];
+                        if (voxel == 0) map[x, z, y] = false;
                         else map[x, z, y] = true;
-                        color[x, z, y] = volume.data[z, volume.height - y - 1, x];
+                        color[x, z, y] = voxel;
                     }
                 }
             }
 
             int i, j, k;
-            for (j = 0; j < volume.width; ++j)
+            for (j = 0; j < w; ++j)
             {
-                for (i = 0; i < volume.depth; ++i)
+                for (i = 0; i < d; ++i)
                 {
                     k = 0;
-                    while (k < volume.height)
+                    while (k < h)
                     {
                         int z;
 
                         int airStart = k;
-                        while (k < volume.height && !map[i, j, k]) ++k;
+                        while (k < h && !map[i, j, k]) ++k;
 
                         int topColorsStart = k;
-                        while (k < volume.height && IsSurface(i, j, k, map, volume)) ++k;
+                        while (k < h && IsSurface(i, j, k, map, volume)) ++k;
                         int topColorsEnd = k;
 
-                        while (k < volume.height && map[i, j, k] && !IsSurface(i, j, k, map, volume)) ++k;
+                        while (k < h && map[i, j, k] && !IsSurface(i, j, k, map, volume)) ++k;
 
                         int bottomColorsStart = k;
 
                         z = k;
-                        while (z < volume.height && IsSurface(i, j, z, map, volume)) ++z;
+                        while (z < h && IsSurface(i, j, z, map, volume)) ++z;
 
-                        if (z == volume.height || false) ;
-                        else
+                        if (z != h)
                             while (IsSurface(i, j, k, map, volume))
                                 ++k;
 
@@ -139,7 +142,7 @@ namespace VoxCake.Common
 
                         int colors = topColorsLen + bottomColorsLen;
 
-                        if (k == volume.height) WriteByte(0, bytes);
+                        if (k == h) WriteByte(0, bytes);
                         else WriteByte((byte)(colors + 1), bytes);
 
                         WriteByte((byte)topColorsStart, bytes);

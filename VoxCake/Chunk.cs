@@ -36,27 +36,30 @@ namespace VoxCake
 
         public static void UpdateStack()
         {
-            int count = stack.Count;
-            int cpu = Config.cpuCount;
-            if (count != 0)
+            if (PillarManager.GetPillarToUpdate() == 0)
             {
-                if (count < cpu)
+                int count = stack.Count;
+                int cpu = Config.cpuCount;
+                if (count != 0)
                 {
-                    for (int i = 0; i < count; i++)
+                    if (count < cpu)
                     {
-                        Chunk chunk = stack.Pop();
-                        Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                        for (int i = 0; i < count; i++)
+                        {
+                            Chunk chunk = stack.Pop();
+                            Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                        }
                     }
-                }
-                else
-                {
-                    for (int i = 0; i < cpu; i++)
+                    else
                     {
-                        Chunk chunk = stack.Pop();
-                        Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                        for (int i = 0; i < cpu; i++)
+                        {
+                            Chunk chunk = stack.Pop();
+                            Update(chunk.x, chunk.y, chunk.z, chunk.volume);
+                        }
                     }
+                    RenderSettings.SetViewDistance(RenderSettings.viewDistance+0.25f);
                 }
-                RenderSettings.SetViewDistance(RenderSettings.viewDistance+0.25f);
             }
         }
 
