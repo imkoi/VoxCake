@@ -47,15 +47,17 @@ using UnityEngine;
 
 public class MapExample : Volume
 {
+    [SerializedField] private Camera camera;
+    
     private void Start()
     {
         string path = Application.streamingAssetsPath + "/mapname.vxl"; // CHANGE "mapname" to name of your map file!
         uint innerColor = UColor.RGBAToUint(86, 93, 110, 100);
-        Load(path, innerColor, Camera.main, VolumeFormat.vxl, LoadMode.Near);
+        Load(path, innerColor, camera, VolumeFormat.vxl, LoadMode.Near);
     }
     private void Update()
     {
-        Render(Camera.main, RenderMode.Native);
+        Render(Camera, RenderMode.Native);
     }
 }
 ```
@@ -64,19 +66,22 @@ public class MapExample : Volume
 ## Load model
 To load model in format .vox(for example) you should:
 1. Put model into StreamingAssets folder
-2. Make GameObject with MeshFiler and MeshRenderer components and attach this script
+2. Make GameObject with MeshFiler and MeshRenderer components and attach this script (and attach needed components to script)
 ```csharp
 using VoxCake;
 using UnityEngine;
 
 public class ModelExample
 {
+    [SerializedField] private MeshFilter meshFilter;
+    [SerializedField] private MeshFilter meshRenderer;
+
     private void Start()
     {
         MaterialManager.Init();
 	string path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
-        GetComponent<MeshFilter>().mesh = ModelMesh.Get(path, 0);
-	GetComponent<MeshRenderer>().material = MaterialManager.model;
+        meshFilter.mesh = ModelMesh.Get(path, 0);
+	meshRenderer.material = MaterialManager.model;
     }
 }
 ```
