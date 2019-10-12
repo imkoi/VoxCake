@@ -47,12 +47,12 @@ using UnityEngine;
 
 public class MapExample : Volume
 {
-    [SerializedField] private Camera camera;
+    [SerializeField] private Camera camera;
     
     private void Start()
     {
-        string path = Application.streamingAssetsPath + "/mapname.vxl"; // CHANGE "mapname" to name of your map file!
-        uint innerColor = UColor.RGBAToUint(86, 93, 110, 100);
+        var path = Application.streamingAssetsPath + "/mapname.vxl"; // CHANGE "mapname" to name of your map file!
+        var innerColor = UColor.RGBAToUint(86, 93, 110, 100);
         Load(path, innerColor, camera, VolumeFormat.vxl, LoadMode.Near);
     }
     private void Update()
@@ -74,13 +74,13 @@ using UnityEngine;
 
 public class ModelExample
 {
-    [SerializedField] private MeshFilter meshFilter;
-    [SerializedField] private MeshFilter meshRenderer;
+    [SerializeField] private MeshFilter meshFilter;
+    [SerializeField] private MeshFilter meshRenderer;
 
     private void Start()
     {
         MaterialManager.Init();
-	string path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
+	var path = Application.streamingAssetsPath + "/modelname.vox"; // CHANGE "modelname" to name of your model file!
         meshFilter.mesh = ModelMesh.Get(path, 0);
 	meshRenderer.material = MaterialManager.model;
     }
