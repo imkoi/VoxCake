@@ -75,7 +75,7 @@ using UnityEngine;
 public class ModelExample
 {
     [SerializeField] private MeshFilter meshFilter;
-    [SerializeField] private MeshFilter meshRenderer;
+    [SerializeField] private MeshRenderer meshRenderer;
 
     private void Start()
     {
