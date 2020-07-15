@@ -1,6 +1,6 @@
 # VoxCake
 VoxCake is the framework which provides easy and efficiency work with voxels.
-*Lib is outdated, and not recommended to use because of bad architecture*
+*Lib is outdated, and not recommended to use because of bad architecture and my old shitty code :)*
 ## Features
 - [X] Handling of voxel volumes;
 - [X] Voxel meshing:
